@@ -1,94 +1,189 @@
 # 2-Link Robotic Arm Simulation (SolidWorks & MATLAB/Simulink)
 
-This project, based on the Thapar Institute of Technology Robotics Lab file, details the process of designing a 2-link planar robotic arm in SolidWorks, exporting it to MATLAB/Simulink using Simscape Multibody, and implementing a PID control system to follow a desired trajectory.
+This project details the complete workflow of designing, modeling, and controlling a 2-link planar robotic arm. It bridges the gap between CAD design (SolidWorks) and Control Systems engineering (MATLAB/Simulink) using the Simscape Multibody environment.
 
-## Project Overview
+---
 
-The primary goal is to control the end-effector (gripper) of a 2-link robotic arm to follow a specific path. This is achieved by:
+## Simulation Demo
 
-- **Modeling**: Creating the 3D parts (base, arm 1, arm 2) in SolidWorks.
-- **Exporting**: Using the Simscape Multibody Link add-on to export the SolidWorks assembly into an .xml file that MATLAB can understand.
-- **Importing**: Using the `smimport` command in MATLAB to generate a complete Simscape Multibody model (.slx file) of the robot's physical structure.
-- **Controlling**: Building a closed-loop control system in Simulink around the imported mechanical model.
-- **Simulation**: Running the simulation to visualize the arm's behavior in both a 2D plot and the 3D Mechanics Explorer.
 
-## Key Images
 
-Here are the key components of the project, as referenced in the documentation.
+**Figure 1:** Final trajectory tracking of the robotic arm in Simscape Mechanics Explorer.  
+This confirms that the end-effector follows the commanded trajectory smoothly.
 
-1. **SolidWorks Assembly**: The complete 3D model of the 2-link arm.
-2. **Simulink Control Diagram**: The high-level block diagram showing the entire control loop.
-3. **Mechanical Components**:
+---
 
-| Part 0: Base Link | Part 1: Arm 1 | Part 2: Arm 2 |
-| :---: | :---: | :---: |
-|  |  |  |
+# Project Overview
 
-4. **Final Simulation**: The arm's motion visualized in the Simscape Mechanics Explorer.
+The primary objective is to implement a closed-loop control system where the robot's end-effector follows a defined path (circle, ellipse, figure-8, or line).
 
-## File Structure
+**Workflow Summary:**
+- **Modeling:** Build the robot links in SolidWorks  
+- **Exporting:** Convert the SolidWorks assembly to Simscape XML  
+- **Kinematics:** Forward & inverse kinematics implementation  
+- **Control:** PID tuning for joint-level tracking  
+- **Analysis:** Visualize end-effector tracking, errors, and joint dynamics  
 
-```/2-link-arm-simulation
+---
+
+# Mechanical Modeling (SolidWorks)
+
+The robotic arm consists of:
+- A ground-fixed base
+- Link 1
+- Link 2
+- Two revolute joints
+
+---
+
+## ROBOT Simulation view
+
+![Arm Simulation](images/armsim.gif)
+
+
+**Explanation:**  
+This image represents the full CAD assembly of the robot. Each body is modeled with correct dimensions and mates, ensuring accurate joint geometry when imported to Simscape.
+
+### Component List
+
+| Component       | Description                                       |
+|-----------------|---------------------------------------------------|
+| **Link 0**      | Fixed base (grounded in simulation)               |
+| **Link 1**      | First arm link, rotates about Joint 1             |
+| **Link 2**      | Second arm link, rotates about Joint 2            |
+
+---
+
+# Mathematical Modeling
+
+## Forward Kinematics
+
+\[
+x = L_1\cos(\theta_1) + L_2\cos(\theta_1+\theta_2)
+\]
+
+\[
+y = L_1\sin(\theta_1) + L_2\sin(\theta_1+\theta_2)
+\]
+
+## Inverse Kinematics
+
+<!-- Insert IK geometry diagram here -->
+
+**Explanation:**  
+This figure illustrates how the cosine rule is used to compute joint angles for a given target position. Two configurations—elbow-up and elbow-down—are possible.
+
+---
+
+# Control System Architecture
+
+The system uses a closed-loop feedback controller.
+
+## Simulink Block Diagram
+
+![Control Diagram](/mnt/data/Screenshot 2025-11-19 at 1.54.06 PM.png)
+
+**Explanation:**  
+This diagram shows:
+- Desired trajectory block  
+- IK computation  
+- PID controllers  
+- Simscape mechanical model  
+- Forward kinematics  
+- Feedback loop  
+
+This is the complete high-level control pipeline.
+
+---
+
+# PID Tuning Parameters
+
+| Joint | P   | I   | D   | N   |
+|-------|-----|-----|-----|-----|
+| 1     | 150 | 50  | 10  | 100 |
+| 2     | 120 | 30  | 8   | 100 |
+
+---
+
+# File Structure
+
+```
+/2-link-arm-simulation
 |
 +-- /solidworks
-| |-- Part_0_Link_0.SLDPRT (SolidWorks part file for the base)
-| |-- Part_1_Arm_1.SLDPRT (SolidWorks part file for the first link)
-| |-- Part_2_Arm_2.SLDPRT (SolidWorks part file for the second link)
-| +-- Two_link_ROBOTIC_ARM_ASSEMBLY.SLDASM (The main assembly file)
+| |-- Part_0_Link_0.SLDPRT
+| |-- Part_1_Arm_1.SLDPRT
+| |-- Part_2_Arm_2.SLDPRT
+| +-- ROBOTIC_ARM_ASSEMBLY.SLDASM
 |
 +-- /matlab
-| |-- Two_link_ROBOTIC_ARM_ASSEMBLY.xml (Exported from SolidWorks)
-| |-- Two_link_ROBOTIC_ARM_ASSEMBLY.slx (The Simulink model generated by smimport)
-| |-- forward_kinematics.m (MATLAB function for Forward Kinematics)
-| |-- inverse_kinematics.m (MATLAB function for Inverse Kinematics)
-| |-- desired_trajectory.m (MATLAB function to generate the path)
-| +-- setup_simulation.m (Main script to set parameters and run the sim)
-|
+|-- ROBOTIC_ARM_ASSEMBLY.xml
+|-- ROBOTIC_ARM_ASSEMBLY.slx
+|-- forward_kinematics.m
+|-- inverse_kinematics.m
+|-- desired_trajectory.m
++-- setup_simulation.m
 ```
 
-## Core Control Components (MATLAB Code)
+---
 
-The control diagram relies on several key MATLAB functions to work. These blocks are typically implemented as "MATLAB Function" blocks within Simulink.
+# Simulation Results
 
-- **`desired_trajectory.m`**: Generates the desired (x, y) coordinates for the end-effector at a given time t.
-- **`inverse_kinematics.m`**: Takes the desired (x, y) coordinates and calculates the required joint angles (theta1_d, theta2_d) for the two motors.
-- **PID Controllers**: Two separate PID controllers compare the desired angles (theta1_d, theta2_d) with the actual measured angles from the model and output a torque command.
-- **`forward_kinematics.m`**: Takes the actual joint angles (theta1_a, theta2_a) from the simulation and calculates the actual (x, y) position of the end-effector for plotting.
+## 1. Step Response (Reference Tracking)
 
-## How to Run
+![Step Response](/mnt/data/Screenshot 2025-11-19 at 1.58.38 PM.png)
 
-### SolidWorks:
+**Explanation:**  
+Shows tuned PID vs. block response.  
+The tuned controller:
+- Reduces overshoot  
+- Reduces settling time  
+- Adds stability and smoothness  
 
-1. Create all parts (.SLDPRT) and assemble them (.SLDASM).
-2. Ensure the "Simscape Multibody Link" add-on is installed and enabled (Tools > Add-Ins).
-3. Export the assembly (Tools > Simscape Multibody Link > Export) to generate the .xml file.
+---
 
-### MATLAB:
+## 2. XY Trajectory Tracking
 
-1. Place the .xml file in your /matlab project directory.
-2. Open MATLAB and navigate to this directory.
-3. In the command window, run:
-   ```
+### Desired Trajectory (Reference)
 
-   smimport('Two_link_ROBOTIC_ARM_ASSEMBLY.xml')
-    ```
-   This will automatically generate the Two_link_ROBOTIC_ARM_ASSEMBLY.slx file.
+![Desired XY](/mnt/data/Screenshot 2025-11-19 at 1.56.09 PM.png)
 
-4. Open the .slx file. It will contain the mechanical model.
-5. Build the control system around it as shown in the "Simulink Control Diagram" image.
-6. Configure the "Desired_Trajectory", "Inverse_Kinematics", and "Forward_Kinematics" blocks to use the generated MATLAB functions.
-7. Run the setup_simulation.m script to initialize parameters (link lengths, PID gains).
-8. Run the Simulink simulation.
+**Explanation:**  
+This is the ideal path generated by the trajectory function.
 
-## Dependencies
-SolidWorks
+### Actual Robot Trajectory
 
-MATLAB
+![Actual XY](/mnt/data/Screenshot 2025-11-19 at 1.53.22 PM.png)
 
-Simulink
+**Explanation:**  
+The robot follows the target path closely. Minor deviations are due to inertia and PID tuning.
 
-Simscape
+---
 
-Simscape Multibody
+## 3. Simscape Mechanical Plant
 
-Simscape Multibody Link (Add-on for SolidWorks & MATLAB)
+![Simscape Model](/mnt/data/Screenshot 2025-11-19 at 1.54.06 PM.png)
+
+**Explanation:**  
+Displays the imported CAD model converted into Simscape rigid bodies connected by revolute joints. This block computes real dynamics (mass, inertia, motion).
+
+---
+
+# How to Run
+
+## Step 1 — Build the Arm in SolidWorks  
+1. Create Link 0 (Base)  
+2. Create Link 1  
+3. Create Link 2  
+4. Assemble them with *revolute mates*  
+5. Export using:  
+   `Tools → Simscape Multibody → Export → XML + STEP`
+
+This produces the `.xml` file used in MATLAB.
+
+---
+
+## Step 2 — Clone the Repository
+
+```bash
+git clone https://github.com/yourusername/2-link-arm-simulation.git
