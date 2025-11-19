@@ -58,13 +58,14 @@ The robotic arm consists of:
 
 ## Forward Kinematics
 
-\[
-x = L_1\cos(\theta_1) + L_2\cos(\theta_1+\theta_2)
-\]
+$$
+x = L_1 \cos(\theta_1) + L_2 \cos(\theta_1 + \theta_2)
+$$
 
-\[
-y = L_1\sin(\theta_1) + L_2\sin(\theta_1+\theta_2)
-\]
+$$
+y = L_1 \sin(\theta_1) + L_2 \sin(\theta_1 + \theta_2)
+$$
+
 
 
 
