@@ -4,12 +4,7 @@ This project details the complete workflow of designing, modeling, and controlli
 
 ---
 
-## Simulation Demo
 
-
-
-**Figure 1:** Final trajectory tracking of the robotic arm in Simscape Mechanics Explorer.  
-This confirms that the end-effector follows the commanded trajectory smoothly.
 
 ---
 
