@@ -165,5 +165,5 @@ This produces the `.xml` file used in MATLAB.
 
 ## Step 2 — Clone the Repository
 
-```bash
-git clone https://github.com/yourusername/2-link-arm-simulation.git
+```
+git clone https://github.com/AshwinderPalSingh/2-Link-Robotic-Arm-Simulation-SolidWorks-MATLAB-Simulink-.git
